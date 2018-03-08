@@ -1,0 +1,79 @@
+Processos e Threads
+
+(08/06/2018)--------------------------------------------------------------------
+Teste de mesa
+    Ingredientes
+        - Programa                            <---- estático \
+        - Número da linha sendo executada     <- \             + = Processo
+        - Valor das variáveis                 <---- dinâmico /
+        - Pilhas de invocação de funções      <- /           \_ Estado da computação
+            \_ registradores referentes
+               à pilha
+                    \_ SP, BP, SS <-
+                                   |
+        -Valor das variáveis       |
+            \_ Locais  -> pilha ----               <-\_ Registradores propósito geral => AX, BX, CX, DX
+            \_ Globais -> Segmento de dados -> DS  <-/
+
+        -Número de linha sendo executada
+            \_ Contador de programa => CS, IP
+
+
+Memória
+                      IP                    SP,BP
+                    __|___     _ Globais    __|__
+|-----------|      /      \   /            /     \
+|PROG 1     |  -> | Código | Dados | Heap | Pilha |
+|-----------|      \_ CS    \_ DS     \    \_ SS
+|           |                          \_ Alocação dinâmica (malloc, etc)
+|-----------|
+|PROG 2     |
+|-----------|
+|           |
+|-----------|
+|PROG 3     |
+|-----------|
+
+Fork
+    "Processos não devem fazer hipóteses temporais ou sobre a ordem de execução"
+
+    f = fork();
+    if( f == 0) {
+        printf("Processo filho\n");
+        exit(4);
+    } else {
+        printf("Processo pai\n");
+        w = waitpid(f, &rc, 0);
+    }
+
+    Memória      
+    |-----------|
+    |PROG 1     |  -> | Código | Dados | Heap | Pilha | \
+    |f = forck()|  -> f == ID do proc. filho            \/
+    |-----------|                                      CÓPIA
+    |           |                                       \/
+    |-----------|                                       /
+    |PROG 2     |  -> | Código | Dados | Heap | Pilha |
+    |f == Ø     |
+    |-----------|
+
+
+    f = fork();
+    if(f == 0) {
+        printf("filho: n=%d", n);
+        n = 10;
+        printf("filho: n=%d", n);
+        exit(0);
+    } else {
+        printf("pai: n=%d", n);
+        w = waitpid(f, &status, 0);
+        printf("pai: n=%d\n", n);
+    }
+
+    possíveis prints:
+    filho: n=7 | filho: n=10 | pai: n=7 | pai: n=7
+    filho: n=7 | pai: n=7 | filho: n=10 | pai: n=7
+    pai: n=7 | filho: n=7 | filho: n=10 | pai: n=7
+
+    Precedência: filho 18->20 ---\ -> waitpip()
+                           23 -> 26
