@@ -1,0 +1,71 @@
+Como garantir que um processo não invada outro quando envolvidos em atividades críticas -> Exclusão múta (problemas)
+Como determinar a sequencia de execução dos processos -> Sincronização (problemas)
+
+Condição de disputa:
+
+                      /- Out - Posição de remoção
+                     /  /- In - Posição de inserção
+(Processo) \        /  /
+(Processo) ---> |  |  |  |  | -> Servidor de -> Impressora
+(Processo) /        \             impresão
+                     \_Fila -> vetor de strings (nomes dos arquivos)
+
+Condição de fila vazia: In == Out
+
+Processo põe na fila, como por exemplo:
+    fila[in] = nomearq;  \__ REGIÃO CRÍTICA
+    in++;                /
+
+Servidor tira da fila:
+    for(;;) {
+        if(in != out) {
+            imprime(fila[out]);  \__ REGIÃO CRÍTICA
+            out++;               /
+        }
+    }
+
+Proc A     Proc B    Servidor   in = 3, out = 3
+
+
+        3      4  5  6  7  8  9
+fila | docA  |  |  |  |  |  |  |
+         |
+         | - In
+          \- Out
+
+
+Condição de disputa:
+    Quando dois ou mais processos manipulam dados compartilhados simultaneamente
+
+Região Crítica
+    Partes do código qu e há acesso a memória compartilhada e  que pode levar a condições de disputa
+    É necessári ohaver exclusão mútua entre oos processos durante suas regiões críticas
+    Também chamads de seções críticas
+    Depois que um processo começa a executar a aregião crítica, outro deve esperar o término do primeiro
+    Nenhum processo executando fora de sua região crítica pode bloquear outros processos
+
+    \_Solução geral para exclusão mútua:
+        (emtra_RCC)  --\
+            RC          |--> algoritmos/primitivas p/ resolver
+        (sai_RCC)    --/     o problema
+
+    \_Variáveis de impedimento (LOCK):
+        \_ Ela mesma é sujeita a condição de disputa, ou seja, um lixo e não resolve o nosso problema de disputa
+           Enfim, a lógica dela não é a peace of shit mas não funciona direito
+
+    \_Alternância obrigatória:
+        \_ Viola a condição 3 '-'
+        \_ Nenhum processo fora de sua região crítica pode bloquear outros processos
+        \_ Desperdício de CPU
+
+    \_Solução de Peterson:
+        \_ Combina as variáveis de lock e alternância obrigatória
+        \_ Problema para implementar para mais de 2 processos, solução não trivial
+
+    \_Instrução TSL (test and set lock)
+        \_ Ler um conteúdo de uma variável, no caso lock, e vai colocar 1
+        do {
+            TSL(&reg, &lock); ----\
+        } while (reg != 0);        \
+                                    \_ reg = lock; \_ ATÔMICO *-*
+                                       lock= 1;    /
