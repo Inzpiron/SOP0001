@@ -1,0 +1,16 @@
+Semáforos         Monitores
+Exclusão mutua   Sem. Binário      Por construção (navito)
+Sincronização    Sem. Contadores   Variáveis de condições
+   \
+    \_ Quem sinaliza  => up()
+    |_ Quem espera    => down()
+    |_ Condição falsa => sc == 0
+
+if(count == N)  --\_ MOV ax, (count)
+wait(full); -\|_ CMP ax, N
+||_ JNE 1f
+|__ CALL wait
+
+Monitores dependem de linguagem de programção, enquanto semáforos são implementados pelo SO.
+\_ podem ser usados com C, Java, BASIC, ASM.
+Ambos podem ser usados apenas em sistemas cnetralizados (com memória compartilhada)
